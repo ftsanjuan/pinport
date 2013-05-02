@@ -1,0 +1,41 @@
+# Settings used to connect to the database
+#
+# refer to mysql2 gem documentation for additional connection options
+#   https://github.com/brianmario/mysql2#connection-options
+#
+database:
+  host: localhost
+  username:
+  password:
+  database:
+  socket:
+
+# Database schema settings
+#
+# table:
+#   the table name to import pins into
+# column:
+#   the name of the column (field) to insert pins into
+schema:
+  table: pins
+  column: pin
+
+# Terminal output (notification) settings
+#
+# import:
+#   every:
+#     prints a confirmation message every nth time a pin is imported
+#     reduce number to increase import performance
+#
+notifications:
+  import:
+    every: 20000
+
+# Various debugging settings
+#
+# errors:
+#   verbose:
+#     if set to true, will display error backtraces
+debug:
+  errors:
+    verbose: false
