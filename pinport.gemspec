@@ -17,5 +17,11 @@ Gem::Specification.new do |s|
   s.files        +=  Dir.glob("lib/**/generators/templates/**/*")
   s.executables  << 'pinport'
 
-  s.add_development_dependency  'bundler', '~> 1.0'
+  s.add_runtime_dependency  'bundler', '~> 1.0'
+  s.add_runtime_dependency 'mysql2', '~> 0.3.11'
+  s.add_runtime_dependency 'sequel', '~> 3.46.0'
+
+  s.add_development_dependency 'rake', '~> 10.0.4'
+  s.add_development_dependency 'yard', '~> 0.8.6.1'
+  s.add_development_dependency 'thor', '~> 0.18.1'
 end
