@@ -48,7 +48,7 @@ module Pinport
     @settings['schema']['column'] ||= self.settings['schema']['column']
   end
 
-  # loads a config file to use with pinport
+  # Loads a config file to use with pinport
   # @param file [String] the config file to load
   # @return [Hash] Parsed settings as a hash
   def self.load_config_file(file)
@@ -60,7 +60,7 @@ module Pinport
     end
   end
 
-  # updates settings_file and settings vars if specified
+  # Updates settings_file and settings vars if specified
   # config file can be found
   # @param file [String] the config file to be loaded for settings
   def self.settings_file=(file)
@@ -86,7 +86,7 @@ module Pinport
   end
 
   # Establishes a connection to the database
-  # @param config [String] path to a YAML file specifying database connection details
+  # @param db_config [String] path to a YAML file specifying database connection details, refer to mysql2 connection options for available settings (https://github.com/brianmario/mysql2#connection-options).
   # @return [Sequel::Mysql2::Database]
   def self.db_connection(db_config)
     db_config = db_config.symbolize_keys
@@ -107,9 +107,9 @@ module Pinport
   #
   # @param file [String] path to the file to be imported
   # @param table [String] the table name that pins should be imported into
-  # @param column [String] the column name pins should be inserted into, defaults to "pin"
+  # @param column [String] the column name pins should be inserted into, default: "pin"
   # @param filter [String] a string of characters to filter out from each pin
-  # @param fix_newlines [Boolean] specifies whether to fix newlines (in case of cross-OS incompatibilities), defaults to true
+  # @param fix_newlines [Boolean] specifies whether to fix newlines (in case of cross-OS incompatibilities), default: true
   def self.import_file(file, table = nil, column = nil, filter = nil, fix_newlines = true)
     # convert supplied file path to absolute
     file_original = "#{file}"
@@ -164,7 +164,7 @@ module Pinport
   # Imports pins from folder containing pin files
   #
   # Accepts the same parameters as `import_file` along with the following:
-  # @param extension [String] file extension of files to be imported, defaults to 'txt'
+  # @param extension [String] file extension of files to be imported, default: 'txt'
   def self.import_folder(folder, extension = "txt", table = nil, column = nil, filter = nil, fix_newlines = true)
     folder = File.absolute_path(folder)
     Dir.glob("#{folder}/*.#{extension}").each do |file|

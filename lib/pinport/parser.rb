@@ -4,9 +4,9 @@ module Pinport
     require 'shellwords'
 
     class << self
-      # Fixes linebreaks on files
+      # Fixes linebreaks on files and returns result
       # @param file [String] path to the file to be processed by dos2unix
-      # @param output_path [String] path to file where output should be returned, defaults to same path as `file` parameter
+      # @param output_path [String] path to file where output should be returned, default: same as file
       # @return [String] path to file that was processed
       def dos2unix(file, output_path = nil)
         puts "Fixing newlines for #{file} ..."
@@ -32,7 +32,7 @@ module Pinport
         end
       end
 
-      # Strips characters to be filtered
+      # Strips characters to be filtered and returns result
       # @param file [String] path to the file to be processed
       # @param chars [String] a string of characters to be filtered out
       # @param output_path [String] path to file where output should be returned, defaults to same path as `file` parameter
@@ -58,9 +58,7 @@ module Pinport
         end
       end
 
-      # Runs the `sort` command to sort a text file
-      # Returns true if successfully outputted to a file
-      # Otherwise returns the contents of the result
+      # Runs `sort` command to sort contents of a text file. Returns true if successfully outputted to a file; otherwise prints the contents of the result
       # @param input [String] path to the file to be sorted
       # @param output_path [String] the path to
       def sort_file_contents(input, output_path = nil)
@@ -68,8 +66,7 @@ module Pinport
         # Shellescape arguments to prevent errors
         system("sort #{Shellwords.shellescape(input)} -o #{Shellwords.shellescape(output_path)}") unless output_path == nil
         return true
-
-        # otherwise: return the result
+        # otherwise: print the result
         `sort #{input}`
       end
     end
