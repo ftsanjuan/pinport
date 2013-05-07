@@ -1,11 +1,11 @@
-task :default => [:build]
+task :default => [:build, :install]
 
 task :build do
   puts "Building pinport gem..."
   puts `gem build pinport.gemspec`
+end
 
+task :install do
   puts "Installing pinport..."
   puts `gem install pinport`
-
-  puts "Done building pinport."
 end
