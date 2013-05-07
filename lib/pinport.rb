@@ -1,3 +1,5 @@
+$:.unshift File.dirname(__FILE__)
+
 require 'mysql2'
 require 'yaml'
 require 'sequel'

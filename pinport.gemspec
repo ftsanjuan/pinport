@@ -1,4 +1,4 @@
-require "pinport/version"
+require File.expand_path('lib/pinport/version')
 
 Gem::Specification.new do |s|
   s.name          = 'pinport'
