@@ -9,8 +9,8 @@ class Cli < Thor
 
   # Imports a file contaning pins into the database
   desc "import FILE", "Imports pins from FILE"
-  method_option :table, :default => 'pins', :aliases =>  '-t'
-  method_option :column, :default => 'pin', :aliases => '-c'
+  method_option :table, :default => nil, :aliases =>  '-t'
+  method_option :column, :default => nil, :aliases => '-c'
   method_option :filter, :default => nil, :aliases => '-f'
   method_option :fix_newlines, :type => :boolean, :default => true, :aliases => '-newlines'
   method_option :config_file, :default => 'config.yml', :aliases => '-config'
@@ -20,13 +20,25 @@ class Cli < Thor
     filter = options[:filter]
     fix_newlines = options[:fix_newlines]
     config_file = options[:config_file]
+
+    begin
+      test = File.open(file)
+    rescue => e
+      puts e.message
+      exit 1
+    end
+
     begin
       check_config config_file
-    rescue Exception => e
+    rescue => e
       puts e.message
     else
       # Otherwise... attempt to import pins from FILE into database
-      puts "Attempting to import '#{file}' into table '#{Pinport.schema['table']}'."
+      puts "Attempting import using following settings:"
+      puts "PINs source: #{file}"
+      puts "Target Database: #{Pinport.database_name}"
+      puts "Table: #{Pinport.table_name}"
+      puts "Column: #{Pinport.column_name}"
       if yes? "Continue with import?"
         Pinport.import_file(file, table, column, filter, fix_newlines)
         say "pinport import complete.", :green
@@ -40,13 +52,12 @@ class Cli < Thor
   # Imports a folder of files containing pins into the database
   desc "import_folder FOLDER", "Imports pins from files in a FOLDER"
   method_option :extension, :default => 'txt', :aliases => '-ext'
-  method_option :table, :default => 'pins', :aliases =>  '-t'
-  method_option :column, :default => 'pin', :aliases => '-c'
+  method_option :table, :default => nil, :aliases =>  '-t'
+  method_option :column, :default => nil, :aliases => '-c'
   method_option :filter, :default => nil, :aliases => '-f'
   method_option :fix_newlines, :type => :boolean, :default => true, :aliases => '-newlines'
   method_option :config_file, :default => 'config.yml', :aliases => '-config'
   def import_folder(folder)
-    folder = options[:folder]
     extension = options[:extension]
     table = options[:table]
     column = options[:column]
@@ -60,9 +71,19 @@ class Cli < Thor
       puts e.message
     else
       # Otherwise... attempt to import pins from FILE into database
-      puts "Attempting to import files from '#{folder}' into table '#{table}'."
+      puts "Attempting import using following settings:"
+      file_targets = Dir.glob("#{folder}/*.#{extension}")
+      puts "Found: #{file_targets.count} .#{extension} files in #{folder}:"
+      file_targets.each do |f|
+        puts "  #{f}"
+      end
+      puts "Target:"
+      puts "  Database: #{Pinport.database_name}"
+      puts "  Table: #{Pinport.table_name}"
+      puts "  Column: #{Pinport.column_name}"
+
       if yes? "Continue with import?"
-        Pinport.import_folder(file, table, column, filter, fix_newlines)
+        Pinport.import_folder(folder, extension, table, column, filter, fix_newlines)
         say "pinport import_folder complete.", :green
       else
         say "Import cancelled.", :red
@@ -103,18 +124,18 @@ class Cli < Thor
       end
     end
 
-    # Check if module can successfully use the supplied config_file
-    begin
-      Pinport.settings_file = config_file
-    rescue => e
-      say "Unable to use #{config_file} to configure Pinport.", :red
-      say "Verify that it is a valid YAML file, or try running 'pinport generate' to create a new config file.", :red
-      puts e.message
-      exit 1
-    end
+    # Convert config file path to be absolute
+    config_file = File.absolute_path(config_file)
 
     # Attempt to initialize the module
-    Pinport.initialize
+    begin
+      # Check if module can successfully use the supplied config_file
+      Pinport.initialize(config_file)
+    rescue => e
+      puts e.message
+      say "Unable to use #{config_file} to configure Pinport.", :red
+      say "Verify that it is a valid YAML file, or try running 'pinport generate' to create a new config file.", :red
+    end
   end
 end
 

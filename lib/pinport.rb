@@ -3,6 +3,7 @@ require 'yaml'
 require 'sequel'
 require 'fileutils'
 require 'pinport/parser'
+require 'pinport/error'
 require 'pinport/core_ext/hash'
 require 'pinport/generators/generator'
 
@@ -13,9 +14,10 @@ module Pinport
   @notifications = nil
   @verbose_errors = nil
 
-  def self.initialize
+  def self.initialize(file)
     @db = db_connection(self.settings['database'])
     @verbose_errors = self.settings['debug']['errors']['verbose']
+    self.settings_file = file
   end
 
   def self.db
@@ -31,7 +33,19 @@ module Pinport
   end
 
   def self.schema
-    @settings['schema']
+    @settings['schema'] ||= self.settings['schema']
+  end
+
+  def self.database_name
+    @settings['database']['database'] ||= self.settings['database']['database']
+  end
+
+  def self.table_name
+    @settings['schema']['table'] ||= self.settings['schema']['table']
+  end
+
+  def self.column_name
+    @settings['schema']['column'] ||= self.settings['schema']['column']
   end
 
   # loads a config file to use with pinport
@@ -53,12 +67,6 @@ module Pinport
     if File.exists?(file)
       @settings_file = file
       self.settings = load_config_file(@settings_file)
-      puts "Now using settings from: #{@settings_file}"
-      return true
-    elsif File.exists("#{Dir.pwd}/#{file}")
-      @settings_file = "#{Dir.pwd}/#{file}"
-      self.settings = load_config_file(@settings_file)
-      puts "Now using settings from: #{@settings_file}"
       return true
     else
       raise "Specified settings file could assigned."
@@ -86,8 +94,7 @@ module Pinport
     begin
       Sequel.mysql2(db_config)
     rescue => e
-      puts "An error occurred while establishing database connection."
-      puts "Please verify your database connection information."
+      puts e.message
       if @verbose_errors
         puts "Trace:\n"
         puts e.backtrace
@@ -104,6 +111,17 @@ module Pinport
   # @param filter [String] a string of characters to filter out from each pin
   # @param fix_newlines [Boolean] specifies whether to fix newlines (in case of cross-OS incompatibilities), defaults to true
   def self.import_file(file, table = nil, column = nil, filter = nil, fix_newlines = true)
+    # convert supplied file path to absolute
+    file_original = "#{file}"
+    file = File.absolute_path("#{file}")
+    if !File.exists?(file)
+      raise Pinport::InvalidFileError
+    elsif File.directory?(file)
+      raise Pinport::DirectoryArgumentError
+    end
+
+    # escape filename as precaution
+    # file = Shellwords.shellescape(file)
     source = File.open(file)
     source_dirname = File.dirname(file)
     source_basename = File.basename(file, '.txt')
@@ -119,8 +137,9 @@ module Pinport
 
       # build a Sequel dataset and insert pins into it
       # retrieve table/column names from schema if not specified
-      table = self.settings['schema']['table'] unless table != nil
-      column = self.settings['schema']['column'] unless column != nil
+      puts  "Importing..."
+      table = self.table_name if table == nil
+      column = self.column_name if column == nil
       pins = self.db[table.to_sym]
 
       # open the sorted file and insert each pin line-by-line
@@ -147,8 +166,10 @@ module Pinport
   # Accepts the same parameters as `import_file` along with the following:
   # @param extension [String] file extension of files to be imported, defaults to 'txt'
   def self.import_folder(folder, extension = "txt", table = nil, column = nil, filter = nil, fix_newlines = true)
+    folder = File.absolute_path(folder)
     Dir.glob("#{folder}/*.#{extension}").each do |file|
-      import_file(file, table, column, filter)
+      file = File.absolute_path("#{file}")
+      import_file(file, table, column, filter, fix_newlines)
     end
   end
 end
