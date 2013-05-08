@@ -13,7 +13,7 @@ gem install pinport
 
 ## Configuration
 
-A `config.yml` file specifying details for your MySQL database is required.  Pinport uses the file 
+A `config.yml` file specifying details for your MySQL database is required.  Pinport uses this file to determine how connect to your database and which table/column to insert imported PINs into. It is recommended that you use `pinport generate` to generate this file so that it is appropriately formatted.
 
 ### Generating a config.yml file
 
@@ -41,7 +41,7 @@ pinport import FOLDER
 ## Development
 Clone this repository using `git clone`.
 
-Navigate to the directory of cloned repository and run `rake` to compile and install the gem from 
+Navigate to the directory of cloned repository and run `rake` to compile and install the gem from
 source.
 
 To do the tasks separately:
