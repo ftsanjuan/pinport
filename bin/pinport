@@ -103,7 +103,7 @@ class Cli < Thor
   end
 
   # Verifies if the supplied config file is valid
-  desc "check_config CONFIG_FILE", "Checks pinport's configuration and initializes it"
+  desc "check_config CONFIG_FILE", "Checks pinport's configuration and initializes it", :hide => true
   def check_config(config_file)
     # Prompts user to generate a default config.yml file if it doesn't exist
     if !File.exists?("#{Dir.pwd}/config.yml")
