@@ -3,7 +3,6 @@ require File.expand_path('lib/pinport/version')
 Gem::Specification.new do |s|
   s.name          = 'pinport'
   s.version       = Pinport::VERSION
-  s.date          = '2013-04-29'
   s.summary       = %q{A PIN importing tool}
   s.description   = %q{Pinport is a command-line tool for importing a large list of PINs (Personal Identification Numbers) into a MySQL Database}
   s.authors       = ['Francis San Juan']
